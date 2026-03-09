@@ -8,19 +8,21 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 type WorkspaceListProps = {
   userId: string
+  refreshKey?: number
 }
 
-export const WorkspaceList = ({ userId }: WorkspaceListProps) => {
+export const WorkspaceList = ({ userId, refreshKey = 0 }: WorkspaceListProps) => {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    setLoading(true)
     api
       .get<Workspace[]>("/api/workspaces", { "x-user-id": userId })
       .then(setWorkspaces)
       .catch(console.error)
       .finally(() => setLoading(false))
-  }, [userId])
+  }, [userId, refreshKey])
 
   if (loading) {
     return (

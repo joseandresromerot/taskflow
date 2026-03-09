@@ -69,7 +69,7 @@ export const KanbanCard = ({ card, isDragging = false }: KanbanCardProps) => {
                 const user = assignee.user ?? assignee
                 return (
                   <Avatar key={user.id} className="w-5 h-5 border border-[#1A1A1A]">
-                    <AvatarImage src={user.avatar ?? undefined} />
+                    <AvatarImage src={user.image ?? undefined} />
                     <AvatarFallback className="text-[8px] bg-indigo-500 text-white">
                       {user.name?.charAt(0).toUpperCase()}
                     </AvatarFallback>
