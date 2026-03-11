@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify"
 import { requireAuth } from "../../plugins/auth"
 import {
+  getCard,
   createCard,
   updateCard,
   moveCard,
@@ -21,6 +22,13 @@ import {
 import { WSEvent } from "@taskflow/types"
 
 export async function cardsRoutes(app: FastifyInstance) {
+  // GET /api/cards/:id
+  app.get<{ Params: { id: string } }>("/:id", { preHandler: requireAuth }, async (request, reply) => {
+    const card = await getCard(request.params.id, request.userId)
+    if (!card) return reply.status(404).send({ error: "Not found" })
+    return card
+  })
+
   // POST /api/cards
   app.post("/", { preHandler: requireAuth }, async (request, reply) => {
     const body = createCardSchema.parse(request.body)

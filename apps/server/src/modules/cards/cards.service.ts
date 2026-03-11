@@ -7,6 +7,12 @@ const cardIncludes = {
   labels: { include: { label: true } },
 }
 
+export async function getCard(id: string, userId: string) {
+  const { workspaceId } = await getCardWithWorkspace(id)
+  await assertWorkspaceMember(workspaceId, userId)
+  return prisma.card.findUnique({ where: { id }, include: cardIncludes })
+}
+
 async function getCardWithWorkspace(cardId: string) {
   const card = await prisma.card.findUnique({
     where: { id: cardId },

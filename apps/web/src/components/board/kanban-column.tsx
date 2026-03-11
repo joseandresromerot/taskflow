@@ -14,9 +14,10 @@ type KanbanColumnProps = {
   userId: string
   boardId: string
   onRefetch: () => void
+  onCardClick: (card: Card) => void
 }
 
-export const KanbanColumn = ({ column, userId, boardId, onRefetch }: KanbanColumnProps) => {
+export const KanbanColumn = ({ column, userId, boardId, onRefetch, onCardClick }: KanbanColumnProps) => {
   const [addingCard, setAddingCard] = useState(false)
   const [cardTitle, setCardTitle] = useState("")
 
@@ -68,7 +69,7 @@ export const KanbanColumn = ({ column, userId, boardId, onRefetch }: KanbanColum
       <div className="flex flex-col gap-2 px-2 pb-2 flex-1 min-h-[2rem]">
         <SortableContext items={cardIds} strategy={verticalListSortingStrategy}>
           {column.cards.map((card) => (
-            <KanbanCard key={card.id} card={card} />
+            <KanbanCard key={card.id} card={card} onClick={onCardClick} />
           ))}
         </SortableContext>
       </div>

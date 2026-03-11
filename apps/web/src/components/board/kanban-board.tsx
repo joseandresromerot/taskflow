@@ -4,7 +4,6 @@ import { useState } from "react"
 import {
   DndContext,
   DragEndEvent,
-  DragOverEvent,
   DragOverlay,
   DragStartEvent,
   PointerSensor,
@@ -12,10 +11,11 @@ import {
   useSensors,
   closestCorners,
 } from "@dnd-kit/core"
-import { SortableContext, horizontalListSortingStrategy, arrayMove } from "@dnd-kit/sortable"
+import { SortableContext, horizontalListSortingStrategy } from "@dnd-kit/sortable"
 import { useBoard } from "@/hooks/use-board"
 import { KanbanColumn } from "./kanban-column"
 import { KanbanCard } from "./kanban-card"
+import { CardDetailSheet } from "./card-detail-sheet"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
@@ -30,6 +30,7 @@ type KanbanBoardProps = {
 export const KanbanBoard = ({ boardId, userId }: KanbanBoardProps) => {
   const { board, loading, refetch } = useBoard(boardId, userId)
   const [activeCard, setActiveCard] = useState<Card | null>(null)
+  const [selectedCard, setSelectedCard] = useState<Card | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -41,9 +42,7 @@ export const KanbanBoard = ({ boardId, userId }: KanbanBoardProps) => {
   }
 
   const handleDragStart = ({ active }: DragStartEvent) => {
-    const card = board?.columns
-      ?.flatMap((col) => col.cards ?? [])
-      .find((c) => c.id === active.id)
+    const card = board?.columns?.flatMap((col) => col.cards ?? []).find((c) => c.id === active.id)
     setActiveCard(card ?? null)
   }
 
@@ -51,9 +50,7 @@ export const KanbanBoard = ({ boardId, userId }: KanbanBoardProps) => {
     setActiveCard(null)
     if (!over || active.id === over.id || !board) return
 
-    const sourceCol = board.columns?.find((col) =>
-      col.cards?.some((c) => c.id === active.id)
-    )
+    const sourceCol = board.columns?.find((col) => col.cards?.some((c) => c.id === active.id))
     const targetCol = board.columns?.find(
       (col) => col.id === over.id || col.cards?.some((c) => c.id === over.id)
     )
@@ -109,6 +106,7 @@ export const KanbanBoard = ({ boardId, userId }: KanbanBoardProps) => {
                 userId={userId}
                 boardId={boardId}
                 onRefetch={refetch}
+                onCardClick={setSelectedCard}
               />
             ))}
           </SortableContext>
@@ -118,7 +116,6 @@ export const KanbanBoard = ({ boardId, userId }: KanbanBoardProps) => {
           </DragOverlay>
         </DndContext>
 
-        {/* Add column button */}
         <Button
           variant="outline"
           className="shrink-0 w-72 h-10 border-dashed border-[#2A2A2A] text-[#71717A] bg-transparent hover:text-white hover:border-[#3A3A3A] hover:bg-[#111111] gap-2"
@@ -128,6 +125,15 @@ export const KanbanBoard = ({ boardId, userId }: KanbanBoardProps) => {
           Add column
         </Button>
       </div>
+
+      {/* Card detail sheet */}
+      <CardDetailSheet
+        card={selectedCard}
+        open={!!selectedCard}
+        onClose={() => setSelectedCard(null)}
+        userId={userId}
+        onUpdated={() => { refetch(); setSelectedCard(null) }}
+      />
     </div>
   )
 }

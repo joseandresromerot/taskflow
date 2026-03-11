@@ -2,9 +2,8 @@
 
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { Calendar, User } from "lucide-react"
+import { Calendar } from "lucide-react"
 import { format } from "date-fns"
-import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { Card } from "@taskflow/types"
@@ -12,17 +11,14 @@ import { Card } from "@taskflow/types"
 type KanbanCardProps = {
   card: Card
   isDragging?: boolean
+  onClick?: (card: Card) => void
 }
 
-export const KanbanCard = ({ card, isDragging = false }: KanbanCardProps) => {
+export const KanbanCard = ({ card, isDragging = false, onClick }: KanbanCardProps) => {
   const { setNodeRef, attributes, listeners, transform, transition, isDragging: isSortableDragging } =
     useSortable({ id: card.id, data: { type: "card" } })
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-  }
-
+  const style = { transform: CSS.Transform.toString(transform), transition }
   const isHidden = isSortableDragging && !isDragging
 
   return (
@@ -31,6 +27,7 @@ export const KanbanCard = ({ card, isDragging = false }: KanbanCardProps) => {
       style={style}
       {...attributes}
       {...listeners}
+      onClick={() => !isSortableDragging && onClick?.(card)}
       className={cn(
         "bg-[#1A1A1A] border border-[#2A2A2A] rounded-lg p-3 cursor-grab active:cursor-grabbing hover:border-[#3A3A3A] transition-colors select-none",
         isHidden && "opacity-0",
@@ -62,7 +59,6 @@ export const KanbanCard = ({ card, isDragging = false }: KanbanCardProps) => {
               {format(new Date(card.dueDate), "MMM d")}
             </span>
           )}
-
           {card.assignees && card.assignees.length > 0 && (
             <div className="flex -space-x-1.5 ml-auto">
               {card.assignees.slice(0, 3).map((assignee: any) => {
