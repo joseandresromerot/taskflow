@@ -1,9 +1,10 @@
 
-export enum Role {
-  ADMIN = "ADMIN",
-  EDITOR = "EDITOR",
-  VIEWER = "VIEWER",
-}
+export const Role = {
+  ADMIN: "ADMIN",
+  EDITOR: "EDITOR",
+  VIEWER: "VIEWER",
+} as const
+export type Role = (typeof Role)[keyof typeof Role]
 
 export interface User {
   id: string
@@ -76,17 +77,18 @@ export interface ActivityLog {
   user?: User
 }
 
-export enum WSEvent {
-  CARD_CREATED = "card:created",
-  CARD_UPDATED = "card:updated",
-  CARD_MOVED = "card:moved",
-  CARD_DELETED = "card:deleted",
-  COLUMN_CREATED = "column:created",
-  COLUMN_UPDATED = "column:updated",
-  COLUMN_REORDERED = "column:reordered",
-  COLUMN_DELETED = "column:deleted",
-  MEMBER_JOINED = "member:joined",
-}
+export const WSEvent = {
+  CARD_CREATED: "card:created",
+  CARD_UPDATED: "card:updated",
+  CARD_MOVED: "card:moved",
+  CARD_DELETED: "card:deleted",
+  COLUMN_CREATED: "column:created",
+  COLUMN_UPDATED: "column:updated",
+  COLUMN_REORDERED: "column:reordered",
+  COLUMN_DELETED: "column:deleted",
+  MEMBER_JOINED: "member:joined",
+} as const
+export type WSEvent = (typeof WSEvent)[keyof typeof WSEvent]
 
 export interface WSPayload<T = unknown> {
   event: WSEvent
