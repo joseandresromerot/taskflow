@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TaskFlow — Web
 
-## Getting Started
+Next.js frontend with real-time Kanban board powered by WebSockets.
 
-First, run the development server:
+## Tech stack
 
+- [Next.js 16](https://nextjs.org/) — React framework with App Router
+- [NextAuth v5](https://authjs.dev/) — Authentication (Google, Apple OAuth)
+- [shadcn/ui](https://ui.shadcn.com/) — Component library
+- [Tailwind CSS v4](https://tailwindcss.com/) — Styling
+- [dnd kit](https://dndkit.com/) — Drag and drop
+- [Socket.io client](https://socket.io/) — Real-time updates
+- [Framer Motion](https://www.framer.com/motion/) — Animations
+- [TypeScript](https://www.typescriptlang.org/)
+
+## Requirements
+
+- Node.js 20+
+- pnpm 10+
+- Backend server running (see `apps/server/README.md`)
+
+## Setup
+
+**1. Install dependencies**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**2. Set up environment variables**
+```bash
+cp .env.example .env.local
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Fill in the values:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+AUTH_SECRET="generate with: openssl rand -base64 32"
+NEXT_PUBLIC_SERVER_URL="http://localhost:3001"
 
-## Learn More
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=""
 
-To learn more about Next.js, take a look at the following resources:
+# Optional
+APPLE_CLIENT_ID=""
+APPLE_CLIENT_SECRET=""
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**3. Start the development server**
+```bash
+pnpm dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+App runs on `http://localhost:3000`.
 
-## Deploy on Vercel
+## Scripts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Script | Description |
+|--------|-------------|
+| `pnpm dev` | Start development server |
+| `pnpm build` | Build for production |
+| `pnpm start` | Start production server |
+| `pnpm typecheck` | Type check without emitting |
+| `pnpm lint` | Run ESLint |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project structure
+
+```
+src/
+├── app/
+│   ├── (auth)/login/         # Login page
+│   ├── (app)/dashboard/      # Workspaces dashboard
+│   ├── (app)/board/[boardId] # Kanban board
+│   └── api/auth/             # NextAuth route handler
+├── components/
+│   ├── board/                # Board, column, card components
+│   └── shared/               # Layout, sidebar, theme provider
+├── hooks/
+│   └── use-board.ts          # Board data + WebSocket hook
+└── lib/
+    ├── auth.ts               # NextAuth config
+    ├── api.ts                # HTTP client for Fastify backend
+    ├── prisma.ts             # Prisma client singleton
+    └── socket.ts             # Socket.io client
+```
+
+## Google OAuth setup
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com)
+2. Create a project and enable OAuth consent screen
+3. Create OAuth credentials (Web application)
+4. Add authorized redirect URI: `https://your-domain.com/api/auth/callback/google`
+5. Copy Client ID and Client Secret to your environment variables
+
+## Deployment
+
+Deployed on [Vercel](https://vercel.com). Set the following environment variables in the Vercel dashboard:
+
+| Variable | Description |
+|----------|-------------|
+| `AUTH_SECRET` | Random secret string |
+| `NEXT_PUBLIC_SERVER_URL` | URL of the deployed Fastify backend |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
+| `DATABASE_URL` | PostgreSQL connection string (Neon) |
