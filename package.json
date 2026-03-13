@@ -8,6 +8,9 @@
     "lint": "pnpm --filter './apps/*' lint",
     "typecheck": "pnpm --filter './apps/*' typecheck"
   },
+  "devDependencies": {
+    "next": "16.1.6"
+  },
   "workspaces": [
     "apps/*",
     "packages/*"
