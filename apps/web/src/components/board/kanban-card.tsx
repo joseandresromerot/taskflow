@@ -18,7 +18,7 @@ export const KanbanCard = ({ card, isDragging = false, onClick }: KanbanCardProp
   const { setNodeRef, attributes, listeners, transform, transition, isDragging: isSortableDragging } =
     useSortable({ id: card.id, data: { type: "card" } })
 
-  const style = { transform: CSS.Transform.toString(transform), transition }
+  const style = { transform: CSS.Transform.toString(transform), transition, touchAction: "none" as const }
   const isHidden = isSortableDragging && !isDragging
 
   return (
