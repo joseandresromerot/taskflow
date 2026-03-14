@@ -28,7 +28,7 @@ export const Sidebar = ({ user }: SidebarProps) => {
     .toUpperCase() ?? "?"
 
   return (
-    <aside className="w-14 flex flex-col items-center py-4 gap-4 border-r border-[#1F1F1F] bg-[#0A0A0A]">
+    <aside className="hidden md:flex w-14 flex-col items-center py-4 gap-4 border-r border-[#1F1F1F] bg-[#0A0A0A]">
       {/* Logo */}
       <Link href="/dashboard">
         <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center hover:bg-indigo-400 transition-colors">
