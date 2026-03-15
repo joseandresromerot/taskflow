@@ -7,7 +7,7 @@ export const createCardSchema = z.object({
 
 export const updateCardSchema = z.object({
   title: z.string().min(1).max(255).optional(),
-  description: z.string().optional(),
+  description: z.string().nullable().optional(),
   dueDate: z.string().datetime().optional().nullable(),
 })
 
