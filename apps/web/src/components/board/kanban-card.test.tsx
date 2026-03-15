@@ -45,11 +45,11 @@ describe("KanbanCard", () => {
   })
 
   it("renders a color strip for each label", () => {
-    const card = {
+    const card: Card = {
       ...baseCard,
       labels: [
-        { label: { id: "l1", name: "Bug", color: "#EF4444", boardId: "b1" } },
-        { label: { id: "l2", name: "Feature", color: "#6366F1", boardId: "b1" } },
+        { id: "l1", name: "Bug", color: "#EF4444", boardId: "b1" },
+        { id: "l2", name: "Feature", color: "#6366F1", boardId: "b1" },
       ],
     }
     const { container } = render(<KanbanCard card={card} />)

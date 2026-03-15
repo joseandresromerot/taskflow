@@ -6,6 +6,7 @@ import { workspacesRoutes } from "./modules/workspaces/workspaces.routes"
 import { boardsRoutes } from "./modules/boards/boards.routes"
 import { columnsRoutes } from "./modules/columns/columns.routes"
 import { cardsRoutes } from "./modules/cards/cards.routes"
+import { labelsRoutes } from "./modules/labels/labels.routes"
 
 const app = Fastify({
   logger: {
@@ -30,6 +31,7 @@ async function bootstrap() {
   await app.register(boardsRoutes, { prefix: "/api/boards" })
   await app.register(columnsRoutes, { prefix: "/api/columns" })
   await app.register(cardsRoutes, { prefix: "/api/cards" })
+  await app.register(labelsRoutes, { prefix: "/api/labels" })
 
   const port = Number(process.env.SERVER_PORT) || 3001
   await app.listen({ port, host: "0.0.0.0" })

@@ -18,11 +18,12 @@ import { useBoard, boardQueryKey } from "@/hooks/use-board"
 import { KanbanColumn } from "./kanban-column"
 import { KanbanCard } from "./kanban-card"
 import { CardDetailSheet } from "./card-detail-sheet"
+import { LabelsPopover } from "./labels-popover"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
-import { Plus, Pencil } from "lucide-react"
+import { Plus, Pencil, Tag } from "lucide-react"
 import { api } from "@/lib/api"
-import { Board, Column, Card } from "@taskflow/types"
+import { Board, Column, Card, Label } from "@taskflow/types"
 import { toast } from "sonner"
 
 type KanbanBoardProps = {
@@ -44,6 +45,7 @@ export const KanbanBoard = ({ boardId, userId }: KanbanBoardProps) => {
   const [selectedCard, setSelectedCard] = useState<Card | null>(null)
   const [renamingBoard, setRenamingBoard] = useState(false)
   const [boardName, setBoardName] = useState("")
+  const [showLabels, setShowLabels] = useState(false)
   const boardNameRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
 
@@ -153,12 +155,32 @@ export const KanbanBoard = ({ boardId, userId }: KanbanBoardProps) => {
           <h1 className="text-white text-lg font-semibold">{board.name}</h1>
         )}
         {!renamingBoard && (
-          <button
-            onClick={() => { setBoardName(board.name); setRenamingBoard(true) }}
-            className="text-[#71717A] hover:text-white transition-colors"
-          >
-            <Pencil className="w-3.5 h-3.5" />
-          </button>
+          <>
+            <button
+              onClick={() => { setBoardName(board.name); setRenamingBoard(true) }}
+              className="text-[#71717A] hover:text-white transition-colors"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowLabels((v) => !v)}
+                className="flex items-center gap-1.5 text-[#71717A] hover:text-white transition-colors text-xs"
+              >
+                <Tag className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Labels</span>
+              </button>
+              {showLabels && (
+                <LabelsPopover
+                  boardId={boardId}
+                  userId={userId}
+                  labels={(board.labels ?? []) as Label[]}
+                  onClose={() => setShowLabels(false)}
+                  onRefetch={refetch}
+                />
+              )}
+            </div>
+          </>
         )}
       </div>
 
@@ -204,7 +226,8 @@ export const KanbanBoard = ({ boardId, userId }: KanbanBoardProps) => {
         open={!!selectedCard}
         onClose={() => setSelectedCard(null)}
         userId={userId}
-        onUpdated={() => { refetch(); setSelectedCard(null) }}
+        boardLabels={(board.labels ?? []) as Label[]}
+        onUpdated={refetch}
       />
     </div>
   )

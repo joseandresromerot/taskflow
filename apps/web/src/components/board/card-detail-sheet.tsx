@@ -9,7 +9,7 @@ import { format } from "date-fns"
 import { Calendar, Clock, AlignLeft, User, Tag, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
-import type { Card, ActivityLog, User as UserType } from "@taskflow/types"
+import type { Card, ActivityLog, User as UserType, Label } from "@taskflow/types"
 
 type CardAssignee = { user: UserType }
 type CardLabel = { label: { id: string; name: string; color: string } }
@@ -24,6 +24,7 @@ type CardDetailSheetProps = {
   open: boolean
   onClose: () => void
   userId: string
+  boardLabels: Label[]
   onUpdated: () => void
 }
 
@@ -32,7 +33,7 @@ const LABEL_COLORS = [
   "#F59E0B", "#10B981", "#3B82F6", "#14B8A6",
 ]
 
-export const CardDetailSheet = ({ card, open, onClose, userId, onUpdated }: CardDetailSheetProps) => {
+export const CardDetailSheet = ({ card, open, onClose, userId, boardLabels, onUpdated }: CardDetailSheetProps) => {
   const [detail, setDetail] = useState<CardWithDetails | null>(null)
   const [activity, setActivity] = useState<ActivityLog[]>([])
   const [loading, setLoading] = useState(false)
@@ -87,6 +88,21 @@ export const CardDetailSheet = ({ card, open, onClose, userId, onUpdated }: Card
     setDetail(null)
     setActivity([])
     onClose()
+  }
+
+  const handleToggleLabel = async (labelId: string) => {
+    if (!detail || !card) return
+    const isSelected = detail.labels.some(({ label }) => label.id === labelId)
+    const boardLabel = boardLabels.find((l) => l.id === labelId)
+    if (!boardLabel) return
+
+    if (isSelected) {
+      setDetail((d) => d ? { ...d, labels: d.labels.filter(({ label }) => label.id !== labelId) } : d)
+      await api.delete(`/api/cards/${card.id}/labels/${labelId}`, { "x-user-id": userId })
+    } else {
+      setDetail((d) => d ? { ...d, labels: [...d.labels, { label: boardLabel }] } : d)
+      await api.post(`/api/cards/${card.id}/labels`, { labelId }, { "x-user-id": userId })
+    }
   }
 
   return (
@@ -178,23 +194,27 @@ export const CardDetailSheet = ({ card, open, onClose, userId, onUpdated }: Card
                   <Tag className="w-4 h-4" />
                   <span className="text-xs font-medium uppercase tracking-wide">Labels</span>
                 </div>
-                {detail.labels.length === 0 ? (
-                  <p className="text-[#3A3A3A] text-sm">No labels</p>
+                {boardLabels.length === 0 ? (
+                  <p className="text-[#3A3A3A] text-sm">No labels on this board yet</p>
                 ) : (
                   <div className="flex flex-wrap gap-2">
-                    {detail.labels.map(({ label }) => (
-                      <span
-                        key={label.id}
-                        className="flex items-center gap-1.5 text-xs text-white px-2.5 py-1 rounded-full font-medium"
-                        style={{ backgroundColor: label.color + "33", color: label.color }}
-                      >
-                        <span
-                          className="w-2 h-2 rounded-full"
-                          style={{ backgroundColor: label.color }}
-                        />
-                        {label.name}
-                      </span>
-                    ))}
+                    {boardLabels.map((label) => {
+                      const isSelected = detail.labels.some(({ label: l }) => l.id === label.id)
+                      return (
+                        <button
+                          key={label.id}
+                          onClick={() => handleToggleLabel(label.id)}
+                          className={cn(
+                            "flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium transition-opacity",
+                            isSelected ? "opacity-100" : "opacity-35 hover:opacity-65"
+                          )}
+                          style={{ backgroundColor: label.color + "33", color: label.color }}
+                        >
+                          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: label.color }} />
+                          {label.name}
+                        </button>
+                      )
+                    })}
                   </div>
                 )}
               </div>
