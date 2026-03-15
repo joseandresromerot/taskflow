@@ -119,12 +119,12 @@ export const KanbanBoard = ({ boardId, userId }: KanbanBoardProps) => {
   return (
     <div className="flex flex-col h-full">
       {/* Board header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[#1F1F1F]">
+      <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-[#1F1F1F]">
         <h1 className="text-white text-lg font-semibold">{board.name}</h1>
       </div>
 
       {/* Kanban columns */}
-      <div className="flex gap-4 p-6 overflow-x-auto flex-1 items-start">
+      <div className="flex gap-3 sm:gap-4 p-3 sm:p-6 overflow-x-auto flex-1 items-start">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCorners}

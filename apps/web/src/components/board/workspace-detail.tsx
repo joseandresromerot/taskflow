@@ -50,7 +50,7 @@ export const WorkspaceDetail = ({ workspaceId, userId }: WorkspaceDetailProps) =
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="p-4 sm:p-8">
         <Skeleton className="h-8 w-48 mb-2 bg-[#111111]" />
         <Skeleton className="h-4 w-32 mb-8 bg-[#111111]" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -65,18 +65,18 @@ export const WorkspaceDetail = ({ workspaceId, userId }: WorkspaceDetailProps) =
   if (!workspace) return null
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div className="flex items-center gap-3">
           <button
             onClick={() => router.push("/dashboard")}
-            className="text-[#71717A] hover:text-white transition-colors"
+            className="text-[#71717A] hover:text-white transition-colors shrink-0"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-white text-2xl font-semibold">{workspace.name}</h1>
+            <h1 className="text-white text-xl sm:text-2xl font-semibold">{workspace.name}</h1>
             <p className="text-[#71717A] text-sm mt-0.5">
               {workspace.boards.length} board{workspace.boards.length !== 1 ? "s" : ""} · {workspace.members?.length ?? 0} members
             </p>
@@ -84,7 +84,7 @@ export const WorkspaceDetail = ({ workspaceId, userId }: WorkspaceDetailProps) =
         </div>
 
         <Button
-          className="bg-indigo-500 hover:bg-indigo-400 text-white gap-2"
+          className="bg-indigo-500 hover:bg-indigo-400 text-white gap-2 w-full sm:w-auto"
           onClick={handleCreateBoard}
           disabled={creating}
         >

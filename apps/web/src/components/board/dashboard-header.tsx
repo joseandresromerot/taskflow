@@ -21,15 +21,15 @@ export const DashboardHeader = ({ name, userId, onCreated }: DashboardHeaderProp
 
   return (
     <>
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-white text-2xl font-semibold">
+          <h1 className="text-white text-xl sm:text-2xl font-semibold">
             Good morning, {name} 👋
           </h1>
           <p className="text-[#71717A] text-sm mt-1">Here are your workspaces</p>
         </div>
         <Button
-          className="bg-indigo-500 hover:bg-indigo-400 text-white gap-2"
+          className="bg-indigo-500 hover:bg-indigo-400 text-white gap-2 w-full sm:w-auto"
           onClick={() => setOpen(true)}
         >
           <Plus className="w-4 h-4" />

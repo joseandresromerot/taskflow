@@ -46,7 +46,7 @@ export const KanbanColumn = ({ column, userId, boardId, onRefetch, onCardClick }
     <div
       ref={setNodeRef}
       style={style}
-      className="shrink-0 w-72 flex flex-col bg-[#111111] border border-[#1F1F1F] rounded-xl"
+      className="shrink-0 w-64 sm:w-72 flex flex-col bg-[#111111] border border-[#1F1F1F] rounded-xl"
     >
       {/* Column header */}
       <div
