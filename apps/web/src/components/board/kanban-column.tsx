@@ -1,13 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
-import { MoreHorizontal, Plus } from "lucide-react"
+import { MoreHorizontal, Plus, Pencil, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu"
 import { KanbanCard } from "./kanban-card"
 import { api } from "@/lib/api"
 import { Column, Card } from "@taskflow/types"
+import { toast } from "sonner"
 
 type KanbanColumnProps = {
   column: Column & { cards: Card[] }
@@ -20,6 +28,9 @@ type KanbanColumnProps = {
 export const KanbanColumn = ({ column, userId, boardId, onRefetch, onCardClick }: KanbanColumnProps) => {
   const [addingCard, setAddingCard] = useState(false)
   const [cardTitle, setCardTitle] = useState("")
+  const [renaming, setRenaming] = useState(false)
+  const [columnName, setColumnName] = useState(column.name)
+  const renameRef = useRef<HTMLInputElement>(null)
 
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: column.id,
@@ -32,12 +43,41 @@ export const KanbanColumn = ({ column, userId, boardId, onRefetch, onCardClick }
     opacity: isDragging ? 0.4 : 1,
   }
 
+  useEffect(() => {
+    if (renaming) renameRef.current?.focus()
+  }, [renaming])
+
   const handleAddCard = async () => {
     if (!cardTitle.trim()) return
     await api.post("/api/cards", { columnId: column.id, title: cardTitle }, { "x-user-id": userId })
     setCardTitle("")
     setAddingCard(false)
     onRefetch()
+  }
+
+  const handleRename = async () => {
+    const name = columnName.trim()
+    setRenaming(false)
+    if (!name || name === column.name) {
+      setColumnName(column.name)
+      return
+    }
+    try {
+      await api.patch(`/api/columns/${column.id}`, { name }, { "x-user-id": userId })
+      onRefetch()
+    } catch {
+      toast.error("Failed to rename column")
+      setColumnName(column.name)
+    }
+  }
+
+  const handleDelete = async () => {
+    try {
+      await api.delete(`/api/columns/${column.id}`, { "x-user-id": userId })
+      onRefetch()
+    } catch {
+      toast.error("Failed to delete column")
+    }
   }
 
   const cardIds = column.cards.map((c) => c.id)
@@ -49,20 +89,66 @@ export const KanbanColumn = ({ column, userId, boardId, onRefetch, onCardClick }
       className="shrink-0 w-64 sm:w-72 flex flex-col bg-[#111111] border border-[#1F1F1F] rounded-xl"
     >
       {/* Column header */}
-      <div
-        className="flex items-center justify-between px-3 py-3 cursor-grab active:cursor-grabbing"
-        {...attributes}
-        {...listeners}
-      >
-        <div className="flex items-center gap-2">
-          <span className="text-white text-sm font-medium">{column.name}</span>
-          <span className="text-xs text-[#71717A] bg-[#1A1A1A] px-1.5 py-0.5 rounded-md">
+      <div className="flex items-center justify-between px-3 py-3">
+        <div
+          className="flex items-center gap-2 flex-1 cursor-grab active:cursor-grabbing min-w-0"
+          {...attributes}
+          {...listeners}
+        >
+          {renaming ? (
+            <input
+              ref={renameRef}
+              value={columnName}
+              onChange={(e) => setColumnName(e.target.value)}
+              onBlur={handleRename}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleRename()
+                if (e.key === "Escape") { setRenaming(false); setColumnName(column.name) }
+              }}
+              className="bg-transparent text-white text-sm font-medium focus:outline-none border-b border-indigo-500 w-full"
+            />
+          ) : (
+            <span className="text-white text-sm font-medium truncate">{columnName}</span>
+          )}
+          <span className="text-xs text-[#71717A] bg-[#1A1A1A] px-1.5 py-0.5 rounded-md shrink-0">
             {column.cards.length}
           </span>
         </div>
-        <Button variant="ghost" size="icon" className="w-6 h-6 text-[#71717A] hover:text-white">
-          <MoreHorizontal className="w-4 h-4" />
-        </Button>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-6 h-6 text-[#71717A] hover:text-white shrink-0"
+              />
+            }
+          >
+            <MoreHorizontal className="w-4 h-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            className="bg-[#1A1A1A] border border-[#2A2A2A] min-w-36"
+            align="end"
+          >
+            <DropdownMenuItem
+              className="text-white hover:bg-[#2A2A2A] gap-2 cursor-pointer"
+              onClick={() => setRenaming(true)}
+            >
+              <Pencil className="w-3.5 h-3.5 text-[#71717A]" />
+              Rename
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-[#2A2A2A]" />
+            <DropdownMenuItem
+              variant="destructive"
+              className="gap-2 cursor-pointer"
+              onClick={handleDelete}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Cards */}

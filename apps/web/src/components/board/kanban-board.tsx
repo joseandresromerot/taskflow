@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import {
   DndContext,
   DragEndEvent,
@@ -20,9 +20,10 @@ import { KanbanCard } from "./kanban-card"
 import { CardDetailSheet } from "./card-detail-sheet"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
+import { Plus, Pencil } from "lucide-react"
 import { api } from "@/lib/api"
 import { Board, Column, Card } from "@taskflow/types"
+import { toast } from "sonner"
 
 type KanbanBoardProps = {
   boardId: string
@@ -41,6 +42,9 @@ export const KanbanBoard = ({ boardId, userId }: KanbanBoardProps) => {
   const { board, loading, refetch } = useBoard(boardId, userId)
   const [activeCard, setActiveCard] = useState<Card | null>(null)
   const [selectedCard, setSelectedCard] = useState<Card | null>(null)
+  const [renamingBoard, setRenamingBoard] = useState(false)
+  const [boardName, setBoardName] = useState("")
+  const boardNameRef = useRef<HTMLInputElement>(null)
   const queryClient = useQueryClient()
 
   const sensors = useSensors(
@@ -55,6 +59,18 @@ export const KanbanBoard = ({ boardId, userId }: KanbanBoardProps) => {
       queryClient.invalidateQueries({ queryKey: boardQueryKey(boardId) })
     },
   })
+
+  const handleRenameBoard = async () => {
+    const name = boardName.trim()
+    setRenamingBoard(false)
+    if (!name || name === board?.name) return
+    try {
+      await api.patch(`/api/boards/${boardId}`, { name }, { "x-user-id": userId })
+      refetch()
+    } catch {
+      toast.error("Failed to rename board")
+    }
+  }
 
   const handleAddColumn = async () => {
     await api.post("/api/columns", { boardId, name: "New Column" }, { "x-user-id": userId })
@@ -119,8 +135,31 @@ export const KanbanBoard = ({ boardId, userId }: KanbanBoardProps) => {
   return (
     <div className="flex flex-col h-full">
       {/* Board header */}
-      <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-[#1F1F1F]">
-        <h1 className="text-white text-lg font-semibold">{board.name}</h1>
+      <div className="flex items-center gap-3 px-4 sm:px-6 py-4 border-b border-[#1F1F1F]">
+        {renamingBoard ? (
+          <input
+            ref={boardNameRef}
+            autoFocus
+            value={boardName}
+            onChange={(e) => setBoardName(e.target.value)}
+            onBlur={handleRenameBoard}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleRenameBoard()
+              if (e.key === "Escape") setRenamingBoard(false)
+            }}
+            className="bg-transparent text-white text-lg font-semibold focus:outline-none border-b border-indigo-500"
+          />
+        ) : (
+          <h1 className="text-white text-lg font-semibold">{board.name}</h1>
+        )}
+        {!renamingBoard && (
+          <button
+            onClick={() => { setBoardName(board.name); setRenamingBoard(true) }}
+            className="text-[#71717A] hover:text-white transition-colors"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Kanban columns */}

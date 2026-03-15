@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { api } from "@/lib/api"
-import { Plus, LayoutGrid, ArrowLeft } from "lucide-react"
+import { Plus, LayoutGrid, ArrowLeft, Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
@@ -21,6 +21,9 @@ export const WorkspaceDetail = ({ workspaceId, userId }: WorkspaceDetailProps) =
   const [workspace, setWorkspace] = useState<WorkspaceWithBoards | null>(null)
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
+  const [renaming, setRenaming] = useState(false)
+  const [workspaceName, setWorkspaceName] = useState("")
+  const renameRef = useRef<HTMLInputElement>(null)
 
   const fetchWorkspace = () => {
     setLoading(true)
@@ -32,6 +35,18 @@ export const WorkspaceDetail = ({ workspaceId, userId }: WorkspaceDetailProps) =
   }
 
   useEffect(() => { fetchWorkspace() }, [workspaceId, userId])
+
+  const handleRenameWorkspace = async () => {
+    const name = workspaceName.trim()
+    setRenaming(false)
+    if (!name || name === workspace?.name) return
+    try {
+      await api.patch(`/api/workspaces/${workspaceId}`, { name }, { "x-user-id": userId })
+      fetchWorkspace()
+    } catch {
+      toast.error("Failed to rename workspace")
+    }
+  }
 
   const handleCreateBoard = async () => {
     setCreating(true)
@@ -76,7 +91,32 @@ export const WorkspaceDetail = ({ workspaceId, userId }: WorkspaceDetailProps) =
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-white text-xl sm:text-2xl font-semibold">{workspace.name}</h1>
+            <div className="flex items-center gap-2">
+              {renaming ? (
+                <input
+                  ref={renameRef}
+                  autoFocus
+                  value={workspaceName}
+                  onChange={(e) => setWorkspaceName(e.target.value)}
+                  onBlur={handleRenameWorkspace}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleRenameWorkspace()
+                    if (e.key === "Escape") setRenaming(false)
+                  }}
+                  className="bg-transparent text-white text-xl sm:text-2xl font-semibold focus:outline-none border-b border-indigo-500"
+                />
+              ) : (
+                <h1 className="text-white text-xl sm:text-2xl font-semibold">{workspace.name}</h1>
+              )}
+              {!renaming && (
+                <button
+                  onClick={() => { setWorkspaceName(workspace.name); setRenaming(true) }}
+                  className="text-[#71717A] hover:text-white transition-colors"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
             <p className="text-[#71717A] text-sm mt-0.5">
               {workspace.boards.length} board{workspace.boards.length !== 1 ? "s" : ""} · {workspace.members?.length ?? 0} members
             </p>
