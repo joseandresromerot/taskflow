@@ -51,11 +51,6 @@ export const KanbanBoard = ({ boardId, userId }: KanbanBoardProps) => {
   const moveCard = useMutation({
     mutationFn: ({ cardId, columnId, position }: MoveCardVars) =>
       api.post(`/api/cards/${cardId}/move`, { columnId, position, boardId }, { "x-user-id": userId }),
-    onError: (_err, _vars, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(boardQueryKey(boardId), context.previous)
-      }
-    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: boardQueryKey(boardId) })
     },
