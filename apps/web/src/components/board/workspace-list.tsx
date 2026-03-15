@@ -5,6 +5,7 @@ import { api } from "@/lib/api"
 import { Workspace } from "@taskflow/types"
 import { WorkspaceCard } from "./workspace-card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { toast } from "sonner"
 
 type WorkspaceListProps = {
   userId: string
@@ -20,7 +21,7 @@ export const WorkspaceList = ({ userId, refreshKey = 0 }: WorkspaceListProps) =>
     api
       .get<Workspace[]>("/api/workspaces", { "x-user-id": userId })
       .then(setWorkspaces)
-      .catch(console.error)
+      .catch(() => toast.error("Failed to load workspaces"))
       .finally(() => setLoading(false))
   }, [userId, refreshKey])
 

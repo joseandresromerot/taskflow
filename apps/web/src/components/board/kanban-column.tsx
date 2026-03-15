@@ -152,7 +152,7 @@ export const KanbanColumn = ({ column, userId, boardId, onRefetch, onCardClick }
       </div>
 
       {/* Cards */}
-      <div className="flex flex-col gap-2 px-2 pb-2 flex-1 min-h-[2rem]">
+      <div className="flex flex-col gap-2 px-2 pb-2 flex-1 min-h-8">
         <SortableContext items={cardIds} strategy={verticalListSortingStrategy}>
           {column.cards.map((card) => (
             <KanbanCard key={card.id} card={card} onClick={onCardClick} />

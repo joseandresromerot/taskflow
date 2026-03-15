@@ -6,7 +6,10 @@ import { Calendar } from "lucide-react"
 import { format } from "date-fns"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
-import { Card } from "@taskflow/types"
+import { Card, User, Label } from "@taskflow/types"
+
+type CardAssignee = { user: User } | User
+type CardLabel = { label: Label; labelId?: string } | Label
 
 type KanbanCardProps = {
   card: Card
@@ -37,13 +40,16 @@ export const KanbanCard = ({ card, isDragging = false, onClick }: KanbanCardProp
       {/* Labels */}
       {card.labels && card.labels.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-2">
-          {card.labels.map((cl: any) => (
-            <span
-              key={cl.label?.id ?? cl.labelId}
-              className="h-1.5 w-8 rounded-full"
-              style={{ backgroundColor: cl.label?.color ?? "#6366F1" }}
-            />
-          ))}
+          {card.labels.map((cl: CardLabel) => {
+            const label = "label" in cl ? cl.label : cl
+            return (
+              <span
+                key={label.id}
+                className="h-1.5 w-8 rounded-full"
+                style={{ backgroundColor: label.color ?? "#6366F1" }}
+              />
+            )
+          })}
         </div>
       )}
 
@@ -61,8 +67,8 @@ export const KanbanCard = ({ card, isDragging = false, onClick }: KanbanCardProp
           )}
           {card.assignees && card.assignees.length > 0 && (
             <div className="flex -space-x-1.5 ml-auto">
-              {card.assignees.slice(0, 3).map((assignee: any) => {
-                const user = assignee.user ?? assignee
+              {card.assignees.slice(0, 3).map((assignee: CardAssignee) => {
+                const user = "user" in assignee ? assignee.user : assignee
                 return (
                   <Avatar key={user.id} className="w-5 h-5 border border-[#1A1A1A]">
                     <AvatarImage src={user.image ?? undefined} />

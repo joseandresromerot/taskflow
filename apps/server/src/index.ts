@@ -31,10 +31,10 @@ async function bootstrap() {
 
   const port = Number(process.env.SERVER_PORT) || 3001
   await app.listen({ port, host: "0.0.0.0" })
-  console.log(`Server running on http://localhost:${port}`)
+  app.log.info(`Server running on http://localhost:${port}`)
 }
 
 bootstrap().catch((err) => {
-  console.error(err)
+  process.stderr.write(`${err}\n`)
   process.exit(1)
 })
