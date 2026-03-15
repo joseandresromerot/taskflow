@@ -61,6 +61,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm --filter @taskflow/server exec prisma generate
+
       - name: Run tests
         run: pnpm --filter @taskflow/server test
         env:
