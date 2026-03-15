@@ -1,3 +1,4 @@
+// Singleton pattern to avoid multiple Prisma instances in development
 import { PrismaClient } from "@prisma/client"
 
 const globalForPrisma = globalThis as unknown as {
