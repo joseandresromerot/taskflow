@@ -1,50 +1,49 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect } from "react"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/lib/api"
 import { getSocket, joinBoard, leaveBoard, onBoardEvent } from "@/lib/socket"
-import { Board, Card, WSEvent } from "@taskflow/types"
+import { Board, WSEvent } from "@taskflow/types"
+
+export const boardQueryKey = (boardId: string) => ["board", boardId]
 
 export const useBoard = (boardId: string, userId: string) => {
-  const [board, setBoard] = useState<Board | null>(null)
-  const [loading, setLoading] = useState(true)
+  const queryClient = useQueryClient()
 
-  const fetchBoard = useCallback(async () => {
-    try {
-      const data = await api.get<Board>(`/api/boards/${boardId}`, { "x-user-id": userId })
-      setBoard(data)
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
-  }, [boardId, userId])
+  const { data: board, isLoading: loading } = useQuery({
+    queryKey: boardQueryKey(boardId),
+    queryFn: () => api.get<Board>(`/api/boards/${boardId}`, { "x-user-id": userId }),
+  })
 
   useEffect(() => {
-    fetchBoard()
-
     const socket = getSocket()
     socket.connect()
     joinBoard(boardId)
 
-    const offCardMoved = onBoardEvent<Card>(WSEvent.CARD_MOVED, () => fetchBoard())
-    const offCardCreated = onBoardEvent<Card>(WSEvent.CARD_CREATED, () => fetchBoard())
-    const offCardUpdated = onBoardEvent<Card>(WSEvent.CARD_UPDATED, () => fetchBoard())
-    const offCardDeleted = onBoardEvent<Card>(WSEvent.CARD_DELETED, () => fetchBoard())
-    const offColumnCreated = onBoardEvent(WSEvent.COLUMN_CREATED, () => fetchBoard())
-    const offColumnReordered = onBoardEvent(WSEvent.COLUMN_REORDERED, () => fetchBoard())
+    const invalidate = () =>
+      queryClient.invalidateQueries({ queryKey: boardQueryKey(boardId) })
+
+    const offCardCreated = onBoardEvent(WSEvent.CARD_CREATED, invalidate)
+    const offCardUpdated = onBoardEvent(WSEvent.CARD_UPDATED, invalidate)
+    const offCardMoved = onBoardEvent(WSEvent.CARD_MOVED, invalidate)
+    const offCardDeleted = onBoardEvent(WSEvent.CARD_DELETED, invalidate)
+    const offColumnCreated = onBoardEvent(WSEvent.COLUMN_CREATED, invalidate)
+    const offColumnReordered = onBoardEvent(WSEvent.COLUMN_REORDERED, invalidate)
 
     return () => {
       leaveBoard(boardId)
       socket.disconnect()
-      offCardMoved()
       offCardCreated()
       offCardUpdated()
+      offCardMoved()
       offCardDeleted()
       offColumnCreated()
       offColumnReordered()
     }
-  }, [boardId, fetchBoard])
+  }, [boardId, queryClient])
 
-  return { board, loading, refetch: fetchBoard }
+  const refetch = () => queryClient.invalidateQueries({ queryKey: boardQueryKey(boardId) })
+
+  return { board, loading, refetch }
 }
