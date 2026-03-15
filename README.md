@@ -29,3 +29,10 @@ pnpm dev               # Start all apps
 ```
 
 See each app's README for detailed setup instructions.
+
+## Stack
+
+- **Frontend:** Next.js (App Router), TypeScript, Tailwind CSS, shadcn/ui
+- **Backend:** Fastify, TypeScript, Prisma
+- **Database:** PostgreSQL (Neon)
+- **Real-time:** Socket.io
