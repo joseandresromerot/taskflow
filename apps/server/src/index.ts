@@ -1,6 +1,7 @@
 import Fastify from "fastify"
 import { corsPlugin } from "./plugins/cors"
 import { setupWebSocket } from "./plugins/websocket"
+import { setupErrorHandler } from "./plugins/error-handler"
 import { workspacesRoutes } from "./modules/workspaces/workspaces.routes"
 import { boardsRoutes } from "./modules/boards/boards.routes"
 import { columnsRoutes } from "./modules/columns/columns.routes"
@@ -17,6 +18,7 @@ const app = Fastify({
 
 async function bootstrap() {
   // Plugins
+  setupErrorHandler(app)
   await corsPlugin(app)
   setupWebSocket(app)
 

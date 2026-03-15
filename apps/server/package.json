@@ -6,7 +6,10 @@
     "dev": "tsx watch src/index.ts",
     "build": "prisma generate && prisma migrate deploy && tsc",
     "start": "node dist/index.js",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@fastify/cors": "^10.0.2",
@@ -21,8 +24,10 @@
   },
   "devDependencies": {
     "@types/node": "^22.13.13",
+    "@vitest/coverage-v8": "^4.1.0",
     "prisma": "^6.5.0",
     "tsx": "^4.19.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.0"
   }
 }
