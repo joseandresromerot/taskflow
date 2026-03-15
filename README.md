@@ -36,3 +36,4 @@ See each app's README for detailed setup instructions.
 - **Backend:** Fastify, TypeScript, Prisma
 - **Database:** PostgreSQL (Neon)
 - **Real-time:** Socket.io
+- **Auth:** NextAuth.js
